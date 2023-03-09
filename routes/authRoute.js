@@ -1,9 +1,9 @@
-import express from 'express'
+import { Router } from 'express'
 import { login, register } from '../controllers/authController.js'
 import { body } from 'express-validator'
 import expressValidation from '../middlewares/validationResult.js'
 
-const authRouter = express.Router()
+const authRouter = Router()
 
 authRouter.post(
     '/register',
@@ -23,7 +23,7 @@ authRouter.post(
     register
 );
 
-authRouter.put('/login',
+authRouter.post('/login',
     [
         body('email', "Formato email incorrecto").trim().isEmail().normalizeEmail(),
         body('password', "Formato de contrasela incorrecta").trim().isLength({ min: 5 })

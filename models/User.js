@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import bcryptjs from "bcryptjs"
 
-const collName = 'user'
+const collName = 'User'
 
 const userScherma = new mongoose.Schema({
     email: {
@@ -11,12 +12,33 @@ const userScherma = new mongoose.Schema({
         lowercase: true,
         index: { unique: true }
     },
-    passwoerd: {
+    password: {
         type: String,
         required: true
     },
 })
 
-const UserModel = mongoose.model(collName, userScherma)
+//Antes de que se envie el modelo hacemos esto
+//"save es el evento que queremos tomar"
+userScherma.pre("save", async function (next) {
+    const user = this;
+    if (!user.isModified('password')) return next()
 
-export default modelUser
+    try {
+        const salt = bcryptjs.genSaltSync(10)
+        user.password = await bcryptjs.hashSync(user.password, salt)
+        next()
+    } catch (error) {
+        console.log(error);
+        console.log('fallo hash contra');
+    }
+})
+
+//Metodos para el modelo de usuarios
+userScherma.methods.comparePassword = async function (frontPassword) {
+    return await bcryptjs.compare(frontPassword, this.password)
+}
+
+const ModelUser = mongoose.model(collName, userScherma)
+
+export default ModelUser
