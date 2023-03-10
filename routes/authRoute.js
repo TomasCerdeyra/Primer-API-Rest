@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { login, register } from '../controllers/authController.js'
+import { login, register, refreshToken, logout } from '../controllers/authController.js'
 import { body } from 'express-validator'
 import expressValidation from '../middlewares/validationResult.js'
 
@@ -32,5 +32,7 @@ authRouter.post('/login',
     login
 );
 
+authRouter.get('/refresh', refreshToken)
 
+authRouter.get('/logout', logout)
 export default authRouter
