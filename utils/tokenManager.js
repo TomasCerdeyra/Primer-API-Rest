@@ -23,3 +23,13 @@ export const generateRefreshToken = (uid, res) => {
         console.log(error);
     }
 }
+
+
+//Si falla la verificacion del token manda estos errores, menos el de "No Bearer" que lo hicimos nosotros en el try
+export const tokenVerficationErrors = {
+    "invalid signature": "La furma de JWT no es valida",
+    "jwt expired": "JWT expírado",
+    "invalid token": "Token no valido",
+    "jwt malformed": "JWT formato no valido",
+    "No Bearer": "Utiliza formato Bearer"
+}

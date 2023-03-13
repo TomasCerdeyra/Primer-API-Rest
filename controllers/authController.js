@@ -15,11 +15,10 @@ const register = async (req, res) => {
         await ModelUser.create({ email, password })
 
         //Generamos token jwt
-        //Como primer parametro pasamos la info que queremos enviar en el token y como 
-        //segundo mandamos la clave secreta creada
-        const token = jwt.sign({ uid: user._id }, process.env.JWT - PASS)
+        const { token, expiresIn } = generateToken(user._id)
+        generateRefreshToken(user.id, res)
 
-        res.json({ ok: 'register' })
+        res.status(201).json({ token, expiresIn })
     } catch (error) {
         console.log({ msg: error.message });
 
@@ -55,23 +54,12 @@ const login = async (req, res) => {
 
 const refreshToken = (req, res) => {
     try {
-        const refreshTokenCookie = req.cookies.refreshToken
-        if (!refreshTokenCookie) throw new Error('No existe el token')
-
-        const { uid } = jwt.verify(refreshTokenCookie, process.env.JWT_PASS_REFRESH)
-        const { token, expiresIn } = generateToken(uid)
+        const { token, expiresIn } = generateToken(req.uid)
 
         res.json({ token, expiresIn })
     } catch (error) {
         console.log(error);
-        const TokenVerficationErrors = {
-            "invalid signature": "La furma de JWT no es valida",
-            "jwt expired": "JWT expírado",
-            "invalid token": "Token no valido",
-            "jwt malformed": "JWT formato no valido",
-            "No Bearer": "Utiliza formato Bearer"
-        }
-        res.status(401).json({ error: TokenVerficationErrors[error.message] })
+        res.status(500).json({ error: "error del servidor" })
     }
 }
 
@@ -79,7 +67,7 @@ const refreshToken = (req, res) => {
 const logout = (req, res) => {
     //Destruimos la cookie
     res.clearCookie('refreshToken')
-    res.json({ok: true})
+    res.json({ ok: true })
 }
 
 export {

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { tokenVerficationErrors } from "../utils/tokenManager.js";
 
 export const requireToken = (req, res, next) => {
     try {
@@ -22,14 +23,6 @@ export const requireToken = (req, res, next) => {
     } catch (error) {
         console.log(error);
 
-        //Si falla la verificacion del token manda estos errores, menos el de "No Bearer" que lo hicimos nosotros arriba
-        const TokenVerficationErrors = {
-            "invalid signature": "La furma de JWT no es valida",
-            "jwt expired": "JWT expírado",
-            "invalid token": "Token no valido",
-            "jwt malformed": "JWT formato no valido",
-            "No Bearer": "Utiliza formato Bearer"
-        }
-        return res.status(401).json({ error: TokenVerficationErrors[error.message] })
+        return res.status(401).json({ error: tokenVerficationErrors[error.message] })
     }
 }
