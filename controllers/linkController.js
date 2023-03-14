@@ -13,21 +13,19 @@ const getLinks = async (req, res) => {
 
 const getLink = async (req, res) => {
     try {
-        const { id } = req.params
-        console.log(id);
-        const link = await ModelLink.findOne({_id: id})
-        console.log(link);
+        const { nanoid } = req.params
+        const link = await ModelLink.findOne({ nanoid })
+
+        //validaciones
         if (!link) return res.status(404).json({ error: 'No existe el link' })
 
-        //Con equals me fijo que el uid mandado sea el mismo que el del usuario conectado
-        if(!link.uid.equals(req.uid)) return res.status(404).json({ error: 'No le pertenece ese link' })
-        res.json({ link })
+        res.json({ longLink: link.longLink })
     } catch (error) {
         console.log(error);
-        if(error.kind === 'ObjectId') {
+        if (error.kind === 'ObjectId') {
             return res.status(403).json({ error: 'Formato Id incorrecto' })
         }
-        res.status(500).json({ error: 'Error del serevidor' })
+        return res.status(500).json({ error: 'Error del serevidor' })
     }
 }
 
@@ -35,21 +33,21 @@ const removeLink = async (req, res) => {
     try {
         const { id } = req.params
         const link = await ModelLink.findById(id)
-        
+
         if (!link) return res.status(404).json({ error: 'No existe el link' })
-        
+
         //Con equals me fijo que el uid mandado sea el mismo que el del usuario conectado
-        if(!link.uid.equals(req.uid)) return res.status(404).json({ error: 'No le pertenece ese link' })
+        if (!link.uid.equals(req.uid)) return res.status(404).json({ error: 'No le pertenece ese link' })
 
         await link.remove()
 
         res.json({ link })
     } catch (error) {
         console.log(error);
-        if(error.kind === 'ObjectId') {
+        if (error.kind === 'ObjectId') {
             return res.status(403).json({ error: 'Formato Id incorrecto' })
         }
-        res.status(500).json({ error: 'Error del serevidor' })
+        return res.status(500).json({ error: 'Error del serevidor' })
     }
 }
 
@@ -69,9 +67,38 @@ const createLink = async (req, res) => {
     }
 }
 
+const updateLink = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { longLink } = req.body
+
+        const link = await ModelLink.findById(id)
+
+        //validaciones
+        if (!longLink.startsWith('https://')) {
+            longLink = 'https://' + longLink
+        }
+        if (!link) return res.status(404).json({ error: 'No existe el link' })
+        if (!link.uid.equals(req.uid)) return res.status(404).json({ error: 'No le pertenece ese link' })
+
+        //Atualizo el link
+        link.longLink = longLink
+        await link.save()
+
+        res.json({ link })
+    } catch (error) {
+        console.log(error);
+        if (error.kind === 'ObjectId') {
+            return res.status(403).json({ error: 'Formato Id incorrecto' })
+        }
+        return res.status(500).json({ error: 'Error del serevidor' })
+    }
+}
+
 export {
     getLinks,
     createLink,
     getLink,
-    removeLink
+    removeLink,
+    updateLink
 }
