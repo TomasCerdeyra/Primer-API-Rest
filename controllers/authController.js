@@ -4,7 +4,6 @@ import { generateRefreshToken, generateToken } from "../utils/tokenManager.js";
 
 const register = async (req, res) => {
     const { email, password } = req.body
-    console.log(email);
     try {
         const user = await ModelUser.findOne({ email })
 
